@@ -1,0 +1,18 @@
+Beams:idA = 2212
+Beams:idB = 2212
+Beams:eCM = 13600
+
+HiggsSM:ffbar2HZ = on
+
+23:onMode = off
+23:onIfAny = 13
+25:onMode = off
+25:onIfAny = 5
+
+Random:setSeed = on
+Random:seed = 12345
+
+Next:numberShowInfo = 1
+Next:numberShowProcess = 1
+Next:numberShowEvent = 0
+Main:numberOfEvents = 1000000

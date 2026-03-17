@@ -1,0 +1,42 @@
+services:
+  sim:
+    build:
+      context: ./sim
+      dockerfile: Dockerfile
+    image: hep-sim:latest
+    container_name: hep-sim
+    volumes:
+      - ./shared-data:/data
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+
+  ml:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    image: hep-ml:latest
+    container_name: hep-ml
+    volumes:
+      - ./shared-data:/data
+      - ./ml:/workspace
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+
+  jupyter:
+    build:
+      context: ./ml
+      dockerfile: Dockerfile
+    image: hep-ml:latest
+    container_name: hep-ml-jupyter
+    volumes:
+      - ./shared-data:/data
+      - ./ml:/workspace
+    working_dir: /workspace
+    ports:
+      - "8888:8888"
+    tty: true
+    stdin_open: true
+    command: >
+      jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root
