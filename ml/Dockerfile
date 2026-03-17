@@ -20,6 +20,5 @@ RUN pip install --no-cache-dir \
     torch
 
 WORKDIR /workspace
-COPY inspect_root.py /workspace/
 
 CMD ["/bin/bash"]
