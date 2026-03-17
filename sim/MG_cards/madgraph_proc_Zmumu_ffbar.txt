@@ -1,0 +1,12 @@
+import model sm
+
+define p = g u c d s b u~ c~ d~ s~ b~
+define j = p
+
+generate u u~ > mu+ mu-
+add process d d~ > mu+ mu-
+add process s s~ > mu+ mu-
+add process c c~ > mu+ mu-
+add process b b~ > mu+ mu-
+
+output /tmp/mg5_zmumu_ffbar

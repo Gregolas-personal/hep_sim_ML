@@ -1,0 +1,12 @@
+import model sm
+
+define p = g u c d s b u~ c~ d~ s~ b~
+define j = p
+
+generate u u~ > z h, z > mu+ mu-, h > b b~
+add process d d~ > z h, z > mu+ mu-, h > b b~
+add process s s~ > z h, z > mu+ mu-, h > b b~
+add process c c~ > z h, z > mu+ mu-, h > b b~
+add process b b~ > z h, z > mu+ mu-, h > b b~
+
+output /tmp/mg5_zh_ffbar

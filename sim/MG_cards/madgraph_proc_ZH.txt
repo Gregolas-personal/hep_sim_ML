@@ -1,0 +1,9 @@
+import model sm
+
+define p = g u c d s u~ c~ d~ s~ b b~
+define j = p
+define l+ = e+ mu+
+define l- = e- mu-
+
+generate p p > z h, z > mu+ mu-, h > b b~
+output /tmp/mg5_zh

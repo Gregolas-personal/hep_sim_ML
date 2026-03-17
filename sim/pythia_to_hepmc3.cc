@@ -7,17 +7,23 @@
 #include <string>
 
 int main(int argc, char* argv[]) {
-    std::string cmndFile = "pythia_cmnd_Zmumu.txt";
+    std::string cmndFile = "PYTHIA_cards/pythia_cmnd_Zmumu.txt";
     std::string outFile = "events.hepmc";
     int nEvents = 10000;
+    std::string lheFile;
 
     if (argc > 1) cmndFile = argv[1];
     if (argc > 2) outFile = argv[2];
     if (argc > 3) nEvents = std::stoi(argv[3]);
+    if (argc > 4) lheFile = argv[4];
 
     Pythia8::Pythia pythia;
     pythia.readFile(cmndFile);
     pythia.readString("Main:numberOfEvents = " + std::to_string(nEvents));
+    if (!lheFile.empty()) {
+        pythia.readString("Beams:frameType = 4");
+        pythia.readString("Beams:LHEF = " + lheFile);
+    }
 
     if (!pythia.init()) {
         std::cerr << "PYTHIA init failed\n";

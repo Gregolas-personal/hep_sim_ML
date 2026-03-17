@@ -1,6 +1,11 @@
 FROM python:3.11-slim
 
+ARG TARGETPLATFORM
+ARG TARGETARCH
+
 SHELL ["/bin/bash", "-lc"]
+
+RUN echo "Building ML image for ${TARGETPLATFORM:-unknown} (${TARGETARCH:-unknown})"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \

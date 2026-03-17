@@ -1,14 +1,21 @@
 FROM ubuntu:24.04
 
+ARG TARGETPLATFORM
+ARG TARGETARCH
+
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-lc"]
 
-ENV ROOT_VERSION=6.36.08
-ENV ROOT_TARBALL=root_v6.36.08.Linux-ubuntu24.04-x86_64-gcc13.3.tar.gz
+ENV ROOT_VERSION=6.36.06
+ENV ROOT_BINARY_TARBALL=root_v6.36.06.Linux-ubuntu24.04-x86_64-gcc13.3.tar.gz
+ENV ROOT_SOURCE_TARBALL=root_v6.36.06.source.tar.gz
 ENV PYTHIA_VERSION=8317
 ENV PYTHIA_TARBALL=pythia8317.tgz
 ENV DELPHES_VERSION=3.5.1
 ENV HEPMC3_VERSION=3.3.1
+ENV MADGRAPH_VERSION=3.5.13
+ENV MADGRAPH_TARBALL=MG5_aMC_v3.5.13.tar.gz
+ENV MADGRAPH_SERIES=3.6.x
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils \
@@ -18,6 +25,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     gfortran \
     git \
+    ninja-build \
     rsync \
     wget \
     curl \
@@ -34,6 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libx11-dev \
     libxext-dev \
     libxft-dev \
+    libxrender-dev \
     libxpm-dev \
     libtbb-dev \
     libvdt-dev \
@@ -63,9 +72,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
-RUN wget -q https://root.cern/download/${ROOT_TARBALL} && \
-    tar -xzf ${ROOT_TARBALL} && \
-    rm -f ${ROOT_TARBALL}
+RUN if [[ "${TARGETARCH}" == "amd64" ]]; then \
+      echo "Installing prebuilt ROOT for ${TARGETPLATFORM}"; \
+      curl -fsSL -O https://root.cern/download/${ROOT_BINARY_TARBALL} && \
+      tar -xzf ${ROOT_BINARY_TARBALL} && \
+      rm -f ${ROOT_BINARY_TARBALL}; \
+    elif [[ "${TARGETARCH}" == "arm64" ]]; then \
+      echo "Building ROOT from source for ${TARGETPLATFORM}"; \
+      curl -fsSL -O https://root.cern/download/${ROOT_SOURCE_TARBALL} && \
+      tar -xzf ${ROOT_SOURCE_TARBALL} && \
+      mv root-${ROOT_VERSION} root-src && \
+      cmake -S /opt/root-src -B /opt/root-build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/opt/root \
+        -Dgnuinstall=ON \
+        -Ddavix=OFF \
+        -Dfftw3=ON \
+        -Dgdml=OFF \
+        -Dhttp=OFF \
+        -Dpyroot=OFF \
+        -Droot7=OFF \
+        -Droofit=OFF \
+        -Dtmva=OFF \
+        -Dtestsupport=OFF \
+        -Dtesting=OFF \
+        -Dxrootd=OFF && \
+      cmake --build /opt/root-build --parallel "$(nproc)" && \
+      cmake --install /opt/root-build && \
+      rm -rf /opt/${ROOT_SOURCE_TARBALL} /opt/root-src /opt/root-build; \
+    else \
+      echo "Unsupported TARGETARCH: ${TARGETARCH}" >&2; \
+      exit 1; \
+    fi
 
 ENV ROOTSYS=/opt/root
 ENV PATH=${ROOTSYS}/bin:${PATH}
@@ -111,16 +149,27 @@ ENV DELPHES_DIR=/opt/Delphes
 ENV PATH=${DELPHES_DIR}:${PATH}
 ENV LD_LIBRARY_PATH=${DELPHES_DIR}:${LD_LIBRARY_PATH}
 
+WORKDIR /opt
+RUN curl -fsSL -o ${MADGRAPH_TARBALL} https://launchpad.net/mg5amcnlo/3.0/${MADGRAPH_SERIES}/+download/${MADGRAPH_TARBALL} && \
+    MG_DIR="$(tar -tzf ${MADGRAPH_TARBALL} | head -n 1 | cut -d/ -f1)" && \
+    tar -xzf ${MADGRAPH_TARBALL} && \
+    mv "${MG_DIR}" MG5_aMC && \
+    rm -f ${MADGRAPH_TARBALL}
+
+ENV MADGRAPH_DIR=/opt/MG5_aMC
+ENV PATH=${MADGRAPH_DIR}/bin:${PATH}
+
 RUN pip3 install --break-system-packages --no-cache-dir uproot awkward vector pandas pyarrow
 
 WORKDIR /workspace
 COPY pythia_to_hepmc3.cc /workspace/
-COPY pythia_cmnd_Zmumu.txt /workspace/
-COPY pythia_cmnd_ZH.txt /workspace/
+COPY run_madgraph.sh /workspace/
 COPY run_sim.sh /workspace/
+COPY PYTHIA_cards /workspace/PYTHIA_cards
+COPY MG_cards /workspace/MG_cards
 COPY cards /workspace/cards
 
-RUN chmod +x /workspace/run_sim.sh && \
+RUN chmod +x /workspace/run_sim.sh /workspace/run_madgraph.sh && \
     g++ -O3 -std=c++17 /workspace/pythia_to_hepmc3.cc \
       -o /workspace/pythia_to_hepmc3 \
       -I/usr/local/include \

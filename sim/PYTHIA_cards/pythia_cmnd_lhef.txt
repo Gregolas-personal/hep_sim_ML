@@ -1,0 +1,14 @@
+! Shower and hadronize parton-level events from an external LHE file.
+Init:showChangedSettings = on
+Init:showChangedParticleData = off
+Next:numberShowInfo = 0
+Next:numberShowProcess = 0
+Next:numberShowEvent = 0
+
+PartonLevel:ISR = on
+PartonLevel:FSR = on
+PartonLevel:MPI = on
+HadronLevel:Hadronize = on
+
+Random:setSeed = on
+Random:seed = 0
