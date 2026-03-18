@@ -2,6 +2,7 @@ FROM ubuntu:24.04
 
 ARG TARGETPLATFORM
 ARG TARGETARCH
+ARG ROOT_BUILD_JOBS=4
 
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-lc"]
@@ -72,7 +73,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt
-RUN if [[ "${TARGETARCH}" == "amd64" ]]; then \
+RUN set -euxo pipefail; \
+    if [[ "${TARGETARCH}" == "amd64" ]]; then \
       echo "Installing prebuilt ROOT for ${TARGETPLATFORM}"; \
       curl -fsSL -O https://root.cern/download/${ROOT_BINARY_TARBALL} && \
       tar -xzf ${ROOT_BINARY_TARBALL} && \
@@ -80,8 +82,8 @@ RUN if [[ "${TARGETARCH}" == "amd64" ]]; then \
     elif [[ "${TARGETARCH}" == "arm64" ]]; then \
       echo "Building ROOT from source for ${TARGETPLATFORM}"; \
       curl -fsSL -O https://root.cern/download/${ROOT_SOURCE_TARBALL} && \
-      tar -xzf ${ROOT_SOURCE_TARBALL} && \
-      mv root-${ROOT_VERSION} root-src && \
+      mkdir -p /opt/root-src && \
+      tar -xzf ${ROOT_SOURCE_TARBALL} --strip-components=1 -C /opt/root-src && \
       cmake -S /opt/root-src -B /opt/root-build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/root \
@@ -94,10 +96,11 @@ RUN if [[ "${TARGETARCH}" == "amd64" ]]; then \
         -Droot7=OFF \
         -Droofit=OFF \
         -Dtmva=OFF \
+        -Dtpython=OFF \
         -Dtestsupport=OFF \
         -Dtesting=OFF \
         -Dxrootd=OFF && \
-      cmake --build /opt/root-build --parallel "$(nproc)" && \
+      cmake --build /opt/root-build --parallel "${ROOT_BUILD_JOBS}" && \
       cmake --install /opt/root-build && \
       rm -rf /opt/${ROOT_SOURCE_TARBALL} /opt/root-src /opt/root-build; \
     else \

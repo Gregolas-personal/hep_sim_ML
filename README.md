@@ -52,20 +52,27 @@ The Dockerfiles are platform-aware:
 
 Native Apple Silicon build:
 
-```powershell
-docker compose build --platform linux/arm64
+```sh
+DOCKER_DEFAULT_PLATFORM=linux/arm64 docker compose build
+```
+
+If the native ARM build runs out of memory while compiling ROOT, reduce the ROOT build parallelism:
+
+```sh
+DOCKER_DEFAULT_PLATFORM=linux/arm64 docker compose build --build-arg ROOT_BUILD_JOBS=2
 ```
 
 Apple Silicon with x86 compatibility:
 
-```powershell
-docker compose build --platform linux/amd64
+```sh
+DOCKER_DEFAULT_PLATFORM=linux/amd64 docker compose build
 ```
 
 Notes:
 
 - the `sim` image installs a prebuilt ROOT package on `linux/amd64`
-- the `sim` image builds ROOT from source on `linux/arm64`
+- the `sim` image builds ROOT from source on `linux/arm64`. Thus it may take a while (benchmark Apple M1 Pro 4010s)
+- the native ROOT source build is intentionally capped to `4` parallel jobs by default; override with `--build-arg ROOT_BUILD_JOBS=<n>` if needed
 - the `ml` image uses the same Docker platform selection, but its Python base image is already multi-arch
 
 ## Start JupyterLab
