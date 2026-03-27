@@ -6,7 +6,7 @@ usage() {
 Usage:
   run_sim.sh
   run_sim.sh pythia [cmnd_file] [nevents] [hepmc_out] [root_out] [delphes_card]
-  run_sim.sh madgraph [mg5_card] [pythia_cmnd] [nevents] [lhe_out] [hepmc_out] [root_out] [delphes_card]
+  run_sim.sh madgraph [mg5_card] [pythia_cmnd] [nevents] [lhe_out] [hepmc_out] [root_out] [delphes_card] [run_card_cfg] [param_card]
 
 Notes:
   - Calling run_sim.sh with no mode keeps the original PYTHIA -> Delphes workflow.
@@ -68,9 +68,11 @@ LHE_OUT="${4:-/data/events_mg.lhe}"
 HEPMC_OUT="${5:-/data/events_mg.hepmc}"
 ROOT_OUT="${6:-/data/delphes_mg_output.root}"
 CARD="${7:-/workspace/cards/delphes_card_ATLAS.tcl}"
+RUN_CARD_CFG="${8:-}"
+PARAM_CARD="${9:-}"
 
 echo "[1/3] Generating parton-level events with MadGraph"
-/workspace/run_madgraph.sh "${MG_CARD}" "${NEVENTS}" "${LHE_OUT}"
+/workspace/run_madgraph.sh "${MG_CARD}" "${NEVENTS}" "${LHE_OUT}" "run_01" "${RUN_CARD_CFG}" "${PARAM_CARD}"
 
 echo "[2/3] Showering and hadronizing LHE events with PYTHIA"
 /workspace/pythia_to_hepmc3 "${PYTHIA_CMND}" "${HEPMC_OUT}" "${NEVENTS}" "${LHE_OUT}"
@@ -81,6 +83,8 @@ run_delphes "${CARD}" "${ROOT_OUT}" "${HEPMC_OUT}"
 echo "Done"
 echo "Mode            : madgraph"
 echo "MadGraph card   : ${MG_CARD}"
+echo "Run-card cfg    : ${RUN_CARD_CFG:-<default>}"
+echo "Param card      : ${PARAM_CARD:-<default>}"
 echo "Pythia card     : ${PYTHIA_CMND}"
 echo "LHE file        : ${LHE_OUT}"
 echo "HepMC file      : ${HEPMC_OUT}"

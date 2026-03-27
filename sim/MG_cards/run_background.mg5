@@ -1,0 +1,15 @@
+import model HAHM
+
+define p = g u c d s u~ c~ d~ s~ b b~
+
+generate p p > z z, z > m+ m-, z > m+ m-
+
+output bkg_ZZ_4mu -f
+
+launch bkg_ZZ_4mu
+
+set run_card run_card.dat
+set param_card param_card.dat
+set pythia8_card pythia8_card.dat
+
+shower = Pythia8

@@ -1,0 +1,9 @@
+!--------------------------------------------------
+! Pythia8 card for background: pp > ZZ > 4mu
+!--------------------------------------------------
+
+PartonLevel:ISR = on
+PartonLevel:FSR = on
+HadronLevel:Hadronize = on
+
+Check:event = off

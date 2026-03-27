@@ -1,0 +1,14 @@
+PartonLevel:ISR = on
+PartonLevel:FSR = on
+HadronLevel:Hadronize = on
+
+1023:new = Zp Zp 3 0 0 0.4 0.0 0.0 0.0 50.0
+
+1023:mayDecay = on
+1023:tauCalc = off
+1023:tau0 = 50.0 #15, 100
+
+1023:onMode = off
+1023:onIfMatch = 13 -13
+
+Check:event = off

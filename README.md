@@ -136,6 +136,28 @@ For the dimuon background, `sim/MG_cards/madgraph_proc_Zmumu_ffbar.txt` mirrors 
 
 MadGraph settings still live outside the bash in `sim/MG_cards/*.cfg`, but the execution is in one place: `run_madgraph.sh` creates the process directory, updates `run_card.dat`, runs event generation, and exports the produced LHE file.
 
+Example for dark photon HAHM model:
+
+```powershell
+docker compose run --rm sim /workspace/run_sim.sh madgraph /workspace/MG_cards/madgraph_proc_signal_hZpZp.txt /workspace/PYTHIA_cards/pythia_cmnd_signal_ctau50.txt 50000 /data/events_sig_ctau50_mg.lhe /data/events_sig_ctau50_mg.hepmc /data/delphes_sig_ctau50_mg.root /workspace/cards/delphes_card_ATLAS_tracks.tcl /workspace/MG_cards/madgraph_proc_signal_hZpZp.cfg /workspace/MG_cards/param_card_signal_Zp04.dat
+```
+with background:
+```powershell
+
+docker compose run --rm sim \
+  /workspace/run_sim.sh \
+  madgraph \
+  /workspace/MG_cards/madgraph_proc_ZZ_4mu.txt \
+  /workspace/PYTHIA_cards/pythia_cmnd_ZZ_4mu.txt \
+  50000 \
+  /data/events_bkg_ZZ4mu_mg.lhe \
+  /data/events_bkg_ZZ4mu_mg.hepmc \
+  /data/delphes_bkg_ZZ4mu_mg.root \
+  /workspace/cards/delphes_card_ATLAS_tracks.tcl \
+  /workspace/MG_cards/madgraph_proc_signal_hZpZp.cfg
+```
+
+
 ## Inspect output from the ML container
 
 ```powershell

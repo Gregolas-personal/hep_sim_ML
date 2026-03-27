@@ -1,0 +1,56 @@
+#*********************************************************************
+#                        MadGraph5_aMC@NLO run_card
+#*********************************************************************
+
+# Collider setup
+     6500.0 = ebeam1
+     6500.0 = ebeam2
+     1      = lpp1
+     1      = lpp2
+
+# Number of events / seed
+     50000  = nevents
+     12345  = iseed
+
+# PDF
+     lhapdf = pdlabel
+     260000 = lhaid
+
+# Renormalization / factorization
+     False  = fixed_ren_scale
+     False  = fixed_fac_scale
+     91.188 = scale
+     91.188 = dsqrt_q2fact1
+     91.188 = dsqrt_q2fact2
+
+# Basic object cuts
+     0.0    = ptj
+     5.0    = ptl
+     0.0    = pta
+
+     5.0    = etaj
+     3.0    = etal
+     3.0    = etaa
+
+     0.0    = drjj
+     0.05    = drll
+     0.0    = drjl
+     0.0    = draa
+     0.0    = draj
+     0.0    = dral
+
+# Invariant-mass cuts
+     0.0    = mmjj
+     0.0    = mmll
+
+# Breit-Wigner window
+     15.0   = bwcutoff
+
+# Do not cut on decay products at MG level
+     False  = cut_decays
+
+# No systematics for now
+     False  = use_syst
+
+# Event normalization
+     average = event_norm

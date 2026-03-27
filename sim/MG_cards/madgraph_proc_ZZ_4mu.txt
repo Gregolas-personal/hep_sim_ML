@@ -1,0 +1,4 @@
+define p = g u c d s u~ c~ d~ s~ b b~
+
+generate p p > z z, z > mu+ mu-, z > mu+ mu-
+output bkg_zz_4mu

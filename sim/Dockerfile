@@ -17,6 +17,8 @@ ENV HEPMC3_VERSION=3.3.1
 ENV MADGRAPH_VERSION=3.5.13
 ENV MADGRAPH_TARBALL=MG5_aMC_v3.5.13.tar.gz
 ENV MADGRAPH_SERIES=3.6.x
+ARG HAHM_V5_URLS="https://cp3.irmp.ucl.ac.be/projects/feynrules/raw-attachment/wiki/HAHM/HAHM_MG5model_v5_allyuk.zip https://cp3.irmp.ucl.ac.be/projects/feynrules/attachment/wiki/HAHM/HAHM_MG5model_v5_allyuk.zip"
+ENV HAHM_V5_URLS=${HAHM_V5_URLS}
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils \
@@ -31,6 +33,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     curl \
     ca-certificates \
+    unzip \
     make \
     patch \
     xz-utils \
@@ -161,6 +164,32 @@ RUN curl -fsSL -o ${MADGRAPH_TARBALL} https://launchpad.net/mg5amcnlo/3.0/${MADG
 
 ENV MADGRAPH_DIR=/opt/MG5_aMC
 ENV PATH=${MADGRAPH_DIR}/bin:${PATH}
+
+# Install HAHM v5 UFO into MadGraph models/
+RUN set -euxo pipefail; \
+    cd /tmp; \
+    HAHM_ZIP=/tmp/HAHM_MG5model_v5_allyuk.zip; \
+    rm -f "${HAHM_ZIP}"; \
+    for URL in ${HAHM_V5_URLS}; do \
+      echo "Trying HAHM download from ${URL}"; \
+      if curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 --max-time 300 -o "${HAHM_ZIP}" "${URL}"; then \
+        break; \
+      fi; \
+      rm -f "${HAHM_ZIP}"; \
+    done; \
+    test -s "${HAHM_ZIP}"; \
+    rm -rf /tmp/HAHM_unpack "${MADGRAPH_DIR}/models/HAHM"; \
+    mkdir -p /tmp/HAHM_unpack "${MADGRAPH_DIR}/models/HAHM"; \
+    unzip -q "${HAHM_ZIP}" -d /tmp/HAHM_unpack; \
+    if [[ -f /tmp/HAHM_unpack/particles.py ]]; then \
+      cp -a /tmp/HAHM_unpack/. "${MADGRAPH_DIR}/models/HAHM/"; \
+    else \
+      UFO_DIR="$(find /tmp/HAHM_unpack -mindepth 1 -maxdepth 2 -type f -name particles.py -printf '%h\n' | head -n 1)"; \
+      test -n "${UFO_DIR}"; \
+      cp -a "${UFO_DIR}/". "${MADGRAPH_DIR}/models/HAHM/"; \
+    fi; \
+    test -f "${MADGRAPH_DIR}/models/HAHM/particles.py"; \
+    rm -rf /tmp/HAHM_unpack "${HAHM_ZIP}"
 
 RUN pip3 install --break-system-packages --no-cache-dir uproot awkward vector pandas pyarrow
 

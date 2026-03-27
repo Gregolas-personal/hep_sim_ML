@@ -1,0 +1,15 @@
+import model HAHM
+
+define p = g u c d s u~ c~ d~ s~ b b~
+
+generate p p > h, h > Zp Zp
+
+output signal_h_ZpZp -f
+
+launch signal_h_ZpZp
+
+set run_card run_card.dat
+set param_card param_card.dat
+set pythia8_card pythia8_card.dat
+
+shower = Pythia8
